@@ -207,4 +207,9 @@ marimo/_lsp/
 __marimo__/
 
 
-datasets/1/dataset/
+
+datasets
+runs
+models/weights
+models/weights/*.pt
+
