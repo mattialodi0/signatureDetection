@@ -11,9 +11,9 @@ def draw_boxes(img_tensor, boxes, color=(0,255,0), label=None, linewidth=2):
         cv2.rectangle(img, (x1,y1), (x2,y2), color, linewidth)
     return img
 
-name = 'r0500_01_y_mirrored'
-img_path = f'./datasets/custom_dataset_augmented/images/train/{name}.png'
-label_path = f'./datasets/custom_dataset_augmented/labels/train/{name}.txt'
+name = '45_001'
+img_path = f'./datasets/custom_dataset_full/images/train/{name}.png'
+label_path = f'./datasets/custom_dataset_full/labels/train/{name}.txt'
 
 plt.figure(figsize=(15,10))
 cnt = 1

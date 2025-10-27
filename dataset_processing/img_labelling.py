@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-imgs_dir = './datasets/nist_copy/images'
-labels_dir = './datasets/nist_copy/labels'
-annotations = './datasets/nist_copy/labels.csv'
+imgs_dir = './datasets/snps/images'
+labels_dir = './datasets/snps/labels'
+annotations = './datasets/snps/labels.csv'
 
 #  for classification
 # p=0
@@ -54,4 +54,3 @@ for img_file in os.listdir(imgs_dir):
             width = row['bbox_width']
             height = row['bbox_height']
             f.write(f"{x_min} {y_min} {width} {height}\n")
-

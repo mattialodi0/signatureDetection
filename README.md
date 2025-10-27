@@ -22,9 +22,13 @@ Toy datasets:
     very low accuracy (60%)  
     fast to train 
 - FastRCNN detector:
-    a detector from FastRCNN
-    using both images with and without examples leads to the model never making predictions and stillgetting rewarded half of the times
+    a detector from FastRCNN / RetinaNet
+    using both images with and without examples leads to the model never making predictions and still getting rewarded half of the times
+    => only use labelled data 
 - YOLO detector:
     a detector from YOLOv8
     the dataset is too small for the model, no useful labels are outputted
     
+## TODO
+- add early stopping 
+- encode the dataset for a faster loading
