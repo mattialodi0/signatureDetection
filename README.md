@@ -10,7 +10,7 @@ Toy datasets:
 - custom: for binary classification based on the presence of a signature, binary label
 - custom_labelled: for object detection, with bounding boxes
 - custom_yolo: dataset in YOLO fromat
-- custom_dataset: dataset in COCO format: bbx, bby, bbw, bbh
+- custom_dataset: dataset in .txt format: bbx, bby, bbw, bbh
 
 - Tobacco: inverted images of documents, many of them with a signature
 - NIST: images of tax documents, only one per doc. has a signature, every other has been discarded.

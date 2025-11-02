@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
-imgs_dir = './datasets/snps/images'
-labels_dir = './datasets/snps/labels'
-annotations = './datasets/snps/labels.csv'
+imgs_dir = './datasets/base/tobacco/images'
+labels_dir = './datasets/base/tobacco/labels'
+annotations = './datasets/base/tobacco/labels.csv'
 
 #  for classification
 # p=0

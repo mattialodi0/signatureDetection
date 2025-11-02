@@ -4,6 +4,15 @@ import os
 import random
 
 
+# --- exported ---
+
+def mirror_y(a,b,c):
+    pass
+def translate_y(a,b,c,d):
+    pass
+
+# ----------------
+
 def mirror_x(image_file):
     img_path = os.path.join(images_dir, image_file)
     img = cv2.imread(img_path)

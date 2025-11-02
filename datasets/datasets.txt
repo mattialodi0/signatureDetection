@@ -1,7 +1,7 @@
 signatures for recognition: https://www.kaggle.com/datasets/adeelajmal/gpds-1150
 document imgs (some with signature): https://www.kaggle.com/datasets/suvroo/scanned-images-dataset-for-ocr-and-vlm-finetuning
 document imgs (some with signature): https://www.kaggle.com/datasets/sprytte/tobacco-800-dataset
-?: https://www.nist.gov/srd/nist-special-database-2
+tax documents, 1/5 signed: https://www.nist.gov/srd/nist-special-database-2
 
 
 labelling:
