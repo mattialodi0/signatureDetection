@@ -10,6 +10,8 @@ import os
 import shutil as sh
 import json
 import random
+import cv2
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 import webdataset as wds
 from dataset_processing.data_augmentation import mirror_y, translate_y
@@ -18,30 +20,55 @@ from dataset_processing.data_augmentation import mirror_y, translate_y
 def addDataset(dataset_path, name, source):
     img_files = []
     for img_file in os.listdir(os.path.join(datasets_paths, name, "images")):
-        # sh.copy(os.path.join(datasets_paths, name, "images", img_file),
-        #     os.path.join(dataset_path, "images", name[0]+img_file))
-        # sh.copy(os.path.join(datasets_paths, name, "labels", img_file.replace(".png", ".txt").replace(".jpg", ".txt")),
-        #     os.path.join(dataset_path, "labels", name[0]+img_file.replace(".png", ".txt").replace(".jpg", ".txt")))
+        sh.copy(os.path.join(datasets_paths, name, "images", img_file),
+                os.path.join(dataset_path, "images", name[0]+img_file))
+        sh.copy(os.path.join(datasets_paths, name, "labels", img_file.replace(".png", ".txt").replace(".jpg", ".txt")),
+                os.path.join(dataset_path, "labels", name[0]+img_file.replace(".png", ".txt").replace(".jpg", ".txt")))
         img_files.append(name[0]+img_file)
 
-    # files = splitDataset(dataset_path, source["split"], img_files)
+    files = splitDataset(dataset_path, source["split"], img_files)
     files["train"] = augmentTrainDataset(
-            os.path.join(dataset_path, "images", "train"), 
-            os.path.join(dataset_path, "images", "train"),
-            source.get("augmentations", {}), 
-            files.get("train", []))
+        os.path.join(dataset_path, "images", "train"),
+        os.path.join(dataset_path, "labels", "train"),
+        source.get("augmentations", {}),
+        files.get("train", []))
     return files
 
+# WRONG naming logic
 def augmentTrainDataset(image_dir, label_dir, augmentations, img_files):
+    if not augmentations or len(augmentations.keys()) == 0:
+        return img_files
     augmented_files = img_files.copy()
     for img_file in tqdm(img_files, desc="Applying augmentations"):
+        # read image and labels
+        img = cv2.imread(os.path.join(image_dir, img_file))
+        labels = []
+        with open(os.path.join(label_dir, img_file.replace(".png", ".txt").replace(".jpg", ".txt"))) as f:
+            for line in f:
+                labels.append(line.strip().split())
+        # augmentations
         for aug_name, aug_params in augmentations.items():
             prob = aug_params.get("probability", 1)
             if random.random() <= prob:
+                if not aug_params.get("replace", False):
+                    img_file_aug = img_file.replace(".png", "_aug.png").replace(".jpg", "_aug.jpg")
+                    cv2.imwrite(os.path.join(image_dir, img_file_aug), img)
+                    with open(os.path.join(label_dir, img_file_aug.replace(".png", ".txt").replace(".jpg", ".txt")), 'w') as f:
+                        for label in labels:
+                            f.write(' '.join(map(str, label)) + '\n')
+                    augmented_files.append(img_file_aug)
                 if aug_name == "mirror_y":
-                    mirror_y(image_dir, label_dir, img_file)
+                    img, labels = mirror_y(img, labels)
                 elif aug_name == "translate_y":
-                    translate_y(image_dir, label_dir, img_file, aug_params.get("probability", [0, 1]))
+                    range = aug_params.get("range", [0, 1])
+                    rand_shift = random.randint(
+                        int(range[0]*img.shape[0]), int(range[1]*img.shape[0]))
+                    img, labels = translate_y(img, labels, rand_shift)                    
+        # save augmented image and labels
+        cv2.imwrite(os.path.join(image_dir, img_file), img)
+        with open(os.path.join(label_dir, img_file.replace(".png", ".txt").replace(".jpg", ".txt")), 'w') as f:
+            for label in labels:
+                f.write(' '.join(map(str, label)) + '\n')
     return augmented_files
 
 
@@ -79,6 +106,7 @@ def splitDataset(dataset_path, split, img_files):
                 print(f"Label file not found for image: {name}")
     return files
 
+
 def encodeDataset(dataset_path, images, phase="train"):
     out_dir = os.path.join(dataset_path, f"{phase}-00000.tar")
     with wds.TarWriter(out_dir) as sink:
@@ -115,6 +143,18 @@ if __name__ == '__main__':
     sources = {
         "emails": {
             "split": [0.8, 0.1, 0.1],
+            "augmentations": {}
+        },
+        "forms": {
+            "split": [0.8, 0.1, 0.1],
+            "augmentations": {}
+        },
+        "tobacco": {
+            "split": [0.8, 0.1, 0.1],
+            "augmentations": {}
+        },
+        "nist": {
+            "split": [0.8, 0.1, 0.1],
             "augmentations": {
                 "translate_y": {
                     "replace": True,
@@ -125,23 +165,11 @@ if __name__ == '__main__':
                     "replace": False,
                     "probability": 1
                 },
-            }
-        },
-        "forms": {
-            "split": [0.8, 0.1, 0.1],
-            "augmentations": []
-        },
-        "tobacco": {
-            "split": [0.8, 0.1, 0.1],
-            "augmentations": []
-        },
-        "nist": {
-            "split": [0.8, 0.1, 0.1],
-            "augmentations": []
+            },
         },
         "snps": {
             "split": [0.8, 0.1, 0.1],
-            "augmentations": []
+            "augmentations": {}
         }
     }
 
@@ -159,15 +187,20 @@ if __name__ == '__main__':
         files["train"] = files.get("train", []) + fs["train"]
         files["val"] = files.get("val", []) + fs["val"]
         files["test"] = files.get("test", []) + fs["test"]
-        break
 
-    # files["train"].sort()
-    # files["val"].sort()
-    # files["test"].sort()
+    files["train"].sort()
+    files["val"].sort()
+    files["test"].sort()
 
-    # # from /images and /labels to a faster format
-    # encodeDataset(dataset_path, images=files["train"], phase="train")
-    # encodeDataset(dataset_path, images=files["val"], phase="val")
-    # encodeDataset(dataset_path, images=files["test"], phase="test")
+    # from /images and /labels to a faster format
+    encodeDataset(dataset_path, images=files["train"], phase="train")
+    encodeDataset(dataset_path, images=files["val"], phase="val")
+    encodeDataset(dataset_path, images=files["test"], phase="test")
+    
 
-    # # files = os.listdir(os.path.join(dataset_path, "images", "test"))
+    # files = os.listdir(os.path.join(dataset_path, "images", "train"))
+    # encodeDataset(dataset_path, images=files, phase="train")
+    # files = os.listdir(os.path.join(dataset_path, "images", "val"))
+    # encodeDataset(dataset_path, images=files, phase="val")
+    # files = os.listdir(os.path.join(dataset_path, "images", "test"))
+    # encodeDataset(dataset_path, images=files, phase="test")

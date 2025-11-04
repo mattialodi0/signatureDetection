@@ -6,13 +6,40 @@ import random
 
 # --- exported ---
 
-def mirror_y(a,b,c):
-    pass
-def translate_y(a,b,c,d):
-    pass
+def mirror_y(img, labels):
+    img_mirrored = cv2.flip(img, 1)
+    width = img.shape[1]
+    labels_mirrored = []
+    for lalbel in labels:
+        x, y, w, h = lalbel
+        x = int(x)
+        y = int(y)
+        w = int(w)
+        h = int(h)
+        new_x = width - x - w
+        labels_mirrored.append([new_x, y, w, h])
+    return img_mirrored, labels_mirrored
+
+def translate_y(img, labels, shift):
+    height, width = img.shape[:2]
+    pad = img[-shift:, :]
+    rest = img[:-shift, :]
+    img_shifted = np.vstack((pad, rest))
+    labels_shifted = []    
+    for label in labels:
+        x, y, w, h = label
+        x = int(x)
+        y = int(y)
+        w = int(w)
+        h = int(h)
+        # Wrap label y coordinate
+        new_y = (y + shift) % height
+        labels_shifted.append([x, new_y, w, h])
+
+    return img_shifted, labels_shifted
 
 # ----------------
-
+"""
 def mirror_x(image_file):
     img_path = os.path.join(images_dir, image_file)
     img = cv2.imread(img_path)
@@ -144,3 +171,4 @@ for img_file in selected_files:
     # mirror_y(img_file)
     rand_shift = random.randint(800, 3300)
     shift_y(img_file, rand_shift)
+"""
