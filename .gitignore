@@ -212,3 +212,7 @@ datasets
 runs
 models/weights
 models/weights/*.pt
+*.pt
+
+CenterNet_detector.ipynb
+CenterNet_detector_tf.ipynb

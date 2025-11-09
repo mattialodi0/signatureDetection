@@ -1,34 +1,60 @@
-# signatureDetection
-Handwritten signature detection using CV
+# 🖋️ Signature Detection
+Handwritten Signature Detection using Computer Vision 
+## 📚 Overview
+This project focuses on detecting **handwritten signatures** in scanned documents using modern object detection models.
+The dataset and models were designed to generalize well to real-world documents similar to those encountered in production use cases.
 
-## Dataset
-For the best result the dataset used in the training is composed of images from pre-existing datasets and data on wich the model will be used on in practice.  
-Every image is labelled with the bounding box of the signature, if one is present.  
-To reduce the bias half of the examples present a signature, and half do not.  
+## 📦 Dataset
+To achieve the best results, the training dataset combines **publicly available datasets** with **custom data** reflecting the target domain.
+Each image is labeled with bounding boxes identifying signature regions (when present).
+The script `dataset.py` handles:
+- Dataset assembly from multiple sources
+- Optional data augmentation
+- Encoding and conversion to efficient training formats
 
-Toy datasets:
-- custom: for binary classification based on the presence of a signature, binary label
-- custom_labelled: for object detection, with bounding boxes
-- custom_yolo: dataset in YOLO fromat
-- custom_dataset: dataset in .txt format: bbx, bby, bbw, bbh
+## 🗂️ Data Sources
+- scanned-images-dataset-for-ocr-and-vlm-finetuning
+- tobacco-800-dataset
+- nist-special-database-2
+- Proprietary real-use-case data
 
-- Tobacco: inverted images of documents, many of them with a signature
-- NIST: images of tax documents, only one per doc. has a signature, every other has been discarded.
-        the bb are all in the same position of the page -> data augmentation is needed to remove this bias
+### 🧠 Data Augmentation
+To mitigate bias due to consistent layout patterns in some datasets (e.g., NIST, where all signatures appear in the same position), light augmentation was applied:
+**Horizontal mirroring** (Y-axis)
+**Vertical shifting**
+These transformations help the model generalize across different document formats and signature placements.
 
-## Models
-- Base classifier:
-    a very simple classifer obtained from a pretrained CNN  
-    very low accuracy (60%)  
-    fast to train 
-- FastRCNN detector:
-    a detector from FastRCNN / RetinaNet
-    using both images with and without examples leads to the model never making predictions and still getting rewarded half of the times
-    => only use labelled data 
-- YOLO detector:
-    a detector from YOLOv8
-    the dataset is too small for the model, no useful labels are outputted
-    
-## TODO
-- add early stopping 
-- encode the dataset for a faster loading
+### 🧩 Dataset Format
+Training efficiency was significantly improved by converting the dataset to the **WebDataset** format, which reduced training time by approximately **50%**.
+<hr/>
+
+## 🧠 Models
+### 🔹 Base Classifier
+A simple classifier built from a **pretrained CNN**.
+- **Accuracy:** ~60%
+- **Advantages:** Very fast to train
+- **Limitations:** Low overall accuracy
+---
+### 🔹 Faster R-CNN Detector
+Object detection model based on **Faster R-CNN**.
+**Training note:** Including images without signatures caused the model to receive false rewards — hence, only labeled images were used for training.
+**Backbone:** MobileNet
+**Performance:**
+- Precision: **0.765**
+- Recall: **1.000**
+---
+### 🔹 RetinaNet Detector
+Implementation planned / under development.
+---
+### 🔹 YOLOv8 Detector
+A **YOLOv8**-based model showed the best overall performance.
+- **Confidence threshold:** 0.4
+**Performance metrics:**
+- Precision: **1.000**
+- Recall: **0.895**
+- mAP@50: **0.857**
+- mAP@95: **0.548**
+## ⚙️ Future Work
+- Add RetinaNet implementation
+- Explore transformer-based detectors (e.g., DETR)
+- Build a simple model from scratch
